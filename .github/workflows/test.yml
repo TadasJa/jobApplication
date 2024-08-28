@@ -20,7 +20,23 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'adopt'  # Specify the distribution to use (e.g., adopt, zulu, temurin)
+          distribution: 'adopt'  # Specify the distribution to use
+
+      - name: Install dependencies
+        run: sudo apt-get install -y wget unzip
+
+      - name: Install Chrome
+        run: |
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -y install -f
+
+      - name: Install ChromeDriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | grep -o '[0-9]*\.[0-9]*\.[0-9]*')
+          wget https://chromedriver.storage.googleapis.com/$CHROME_VERSION/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/  # Move to a location in PATH
+          sudo chmod +x /usr/local/bin/chromedriver
 
       - name: Build with Maven
         run: mvn clean install  # Use this if you're using Maven as a build tool
