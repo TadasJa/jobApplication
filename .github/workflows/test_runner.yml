@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Updated to v3
 
       - name: Set up JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3  # Updated to v3
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -57,4 +57,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: test-results
-          path: target/surefire-reports/*.xml  # Adjusted to the correct path
+          path: target/surefire-reports/*.xml  # Ensure this matches where the reports are generated
