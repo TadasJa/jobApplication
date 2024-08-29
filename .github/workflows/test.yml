@@ -39,14 +39,17 @@ jobs:
       - name: Download ChromeDriver
         run: |
           echo "Requesting ChromeDriver for Chrome version ${MAJOR_CHROME_VERSION}"
+          
+          # Get the ChromeDriver version based on the MAJOR_CHROME_VERSION
           CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_CHROME_VERSION}" | tr -d '\n')
           
           # Check if ChromeDriver version retrieval was successful
           if [[ "${CHROME_DRIVER_VERSION}" == "" ]]; then
-            echo "Failed to retrieve ChromeDriver version for major version ${MAJOR_CHROME_VERSION}"
-            exit 1
+            echo "Failed to retrieve ChromeDriver version for major version ${MAJOR_CHROME_VERSION}. Attempting to use the latest version."
+            # Attempt to fetch the latest version if the specific major version fails
+            CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE" | tr -d '\n')
           fi
-
+          
           echo "CHROME_DRIVER_VERSION=${CHROME_DRIVER_VERSION}" >> $GITHUB_ENV
           echo "Downloading ChromeDriver version ${CHROME_DRIVER_VERSION}"
           wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
