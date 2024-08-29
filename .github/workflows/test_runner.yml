@@ -3,7 +3,7 @@ name: Selenium Tests
 on:
   push:
   pull_request:
-  workflow_dispatch:  # Allows manual triggering of the workflow
+  workflow_dispatch:
 
 jobs:
   test:
@@ -20,40 +20,32 @@ jobs:
           distribution: 'temurin'
 
       - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip
+        run: sudo apt-get update && sudo apt-get install -y wget unzip
 
-      - name: Install Specific Version of Google Chrome
+      - name: Install Chrome
         run: |
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O google-chrome.deb
           sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
 
-      - name: Set up Chrome environment
-        id: chrome_setup
+      - name: Set up Chrome and ChromeDriver
         run: |
           export CHROME_BIN="/usr/bin/google-chrome"
           export CHROMEWEBDRIVER="${GITHUB_WORKSPACE}/chrome_driver"
-          CHROME_VERSION="114.0.5735.90"
-          CHROME_DRIVER_VERSION="114.0.5735.90"
           mkdir -p "$CHROMEWEBDRIVER"
-          wget "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip"
+          wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip -d "$CHROMEWEBDRIVER"
           chmod +x "$CHROMEWEBDRIVER/chromedriver"
-
-      - name: Verify Chrome and ChromeDriver versions
-        run: |
-          "$CHROME_BIN" --version
-          "$CHROMEWEBDRIVER/chromedriver" --version
+          echo "Chrome version: $($CHROME_BIN --version)"
+          echo "ChromeDriver version: $($CHROMEWEBDRIVER/chromedriver --version)"
 
       - name: Run Tests
-        run: mvn test
+        run: mvn clean test
 
-      - name: List Files in Surefire Reports Directory
-        run: ls -R target/surefire-reports
+      - name: List Surefire Report Files
+        run: ls -l target/surefire-reports/
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: target/surefire-reports/*.xml  # For XML test results
+          path: target/surefire-reports/*.xml
