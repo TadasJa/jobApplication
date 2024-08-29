@@ -1,13 +1,9 @@
-name: Run Selenium Tests
+name: Selenium Tests
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
+on: [push, pull_request]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,51 +14,49 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'temurin'  # Specify the distribution to use
+          distribution: 'temurin'
 
-      - name: Install Google Chrome
+      - name: Install Dependencies
         run: |
-          echo "Installing Google Chrome..."
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+          sudo apt-get install -y wget unzip
 
-      - name: Get Chrome version
-        id: get_chrome_version
+      - name: Install Chrome
         run: |
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          echo "CHROME_VERSION=${CHROME_VERSION}" >> $GITHUB_ENV
-          MAJOR_CHROME_VERSION=$(echo ${CHROME_VERSION} | cut -d '.' -f 1)
-          echo "MAJOR_CHROME_VERSION=${MAJOR_CHROME_VERSION}" >> $GITHUB_ENV
+          # Attempt to download and install the latest Chrome version
+          echo "Installing Chrome..."
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O google-chrome.deb
+          sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+          echo "Installed Chrome version: ${CHROME_VERSION}"
 
-      - name: Download ChromeDriver
+      - name: Get ChromeDriver version
+        id: get_chromedriver
         run: |
+          MAJOR_CHROME_VERSION=$(echo ${CHROME_VERSION} | cut -d '.' -f 1-2)
           echo "Requesting ChromeDriver for Chrome version ${MAJOR_CHROME_VERSION}"
+
+          # Try to get the ChromeDriver version corresponding to the major Chrome version
+          CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_CHROME_VERSION}" || echo "")
           
-          # Get the ChromeDriver version based on the MAJOR_CHROME_VERSION
-          CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_CHROME_VERSION}" | tr -d '\n')
-          
-          # Check if ChromeDriver version retrieval was successful
-          if [[ "${CHROME_DRIVER_VERSION}" == "" ]]; then
-            echo "Failed to retrieve ChromeDriver version for major version ${MAJOR_CHROME_VERSION}. Attempting to use the latest version."
-            # Attempt to fetch the latest version if the specific major version fails
-            CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE" | tr -d '\n')
+          # Fallback to the latest ChromeDriver if the specific version fails
+          if [ -z "$CHROME_DRIVER_VERSION" ]; then
+            echo "Failed to retrieve ChromeDriver version for major version ${MAJOR_CHROME_VERSION}. Trying latest version..."
+            CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE" || echo "")
           fi
-          
+
+          # Check if ChromeDriver version retrieval was successful
+          if [ -z "$CHROME_DRIVER_VERSION" ]; then
+            echo "Failed to retrieve ChromeDriver version. Exiting."
+            exit 1
+          fi
+
           echo "CHROME_DRIVER_VERSION=${CHROME_DRIVER_VERSION}" >> $GITHUB_ENV
           echo "Downloading ChromeDriver version ${CHROME_DRIVER_VERSION}"
-          wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
+          wget "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip"
           unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/  # Move to a location in PATH
+          sudo mv chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
 
-      - name: Check Versions
-        run: |
-          echo "Chrome Version: $CHROME_VERSION"
-          echo "ChromeDriver Version: $CHROME_DRIVER_VERSION"
-
       - name: Run Tests
-        run: |
-          # Replace with your testing command, e.g., for Maven or Gradle
-          mvn test  # or ./gradlew test
+        run: mvn test
