@@ -1,4 +1,4 @@
-name: Run Tests
+name: CI Workflow
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest  # You can choose a different runner if needed
 
     steps:
-      - name: Check out code
+      - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Set up JDK 17
@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y wget unzip
 
-      - name: Install Chrome
+      - name: Install Google Chrome
         run: |
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -y install -f
@@ -37,14 +37,16 @@ jobs:
           MAJOR_CHROME_VERSION=$(echo $CHROME_VERSION | cut -d '.' -f 1)  # Extract major version only
           echo "CHROME_VERSION=${CHROME_VERSION}" >> $GITHUB_ENV
           echo "MAJOR_CHROME_VERSION=${MAJOR_CHROME_VERSION}" >> $GITHUB_ENV
-          echo "CHROME_VERSION=${CHROME_VERSION}"  # Debugging output
-          echo "MAJOR_CHROME_VERSION=${MAJOR_CHROME_VERSION}"  # Debugging output
 
-      - name: Install ChromeDriver
+      - name: Get ChromeDriver version
+        id: chromedriver
         run: |
           echo "Requesting ChromeDriver for Chrome version ${MAJOR_CHROME_VERSION}"  # Debugging output
           CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_CHROME_VERSION}" | tr -d '\n')
           echo "CHROME_DRIVER_VERSION=${CHROME_DRIVER_VERSION}" >> $GITHUB_ENV  # Store version in environment variable
+
+      - name: Download and install ChromeDriver
+        run: |
           echo "Downloading ChromeDriver version ${CHROME_DRIVER_VERSION}"  # Debugging output
           wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
@@ -52,7 +54,7 @@ jobs:
           sudo chmod +x /usr/local/bin/chromedriver
 
       - name: Build with Maven
-        run: mvn clean install  # Use this if you're using Maven as a build tool
+        run: mvn clean install  # Adjust this if you're using a different build tool
 
       - name: Run tests
-        run: mvn test  # Use this if you want to run tests
+        run: mvn test  # Adjust this if you want to run tests with a different command
