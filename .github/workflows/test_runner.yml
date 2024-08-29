@@ -57,4 +57,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: test-results
-          path: target/test-report/*.xml  # Adjust this path based on your test report location
+          path: target/surefire-reports/*.xml  # Adjusted to the correct path
