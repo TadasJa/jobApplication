@@ -23,7 +23,6 @@ jobs:
 
       - name: Install Chrome
         run: |
-          # Attempt to download and install the latest Chrome version
           echo "Installing Chrome..."
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O google-chrome.deb
           sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
@@ -35,6 +34,12 @@ jobs:
         run: |
           MAJOR_CHROME_VERSION=$(echo ${CHROME_VERSION} | cut -d '.' -f 1-2)
           echo "Requesting ChromeDriver for Chrome version ${MAJOR_CHROME_VERSION}"
+
+          # Check if MAJOR_CHROME_VERSION is empty
+          if [ -z "$MAJOR_CHROME_VERSION" ]; then
+            echo "MAJOR_CHROME_VERSION is empty. Exiting."
+            exit 1
+          fi
 
           # Try to get the ChromeDriver version corresponding to the major Chrome version
           CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_CHROME_VERSION}" || echo "")
