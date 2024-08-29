@@ -1,60 +1,57 @@
-name: CI Workflow
+name: Run Selenium Tests
 
 on:
   push:
     branches:
-      - main  # Change to your default branch (e.g., main)
+      - main
   pull_request:
-    branches:
-      - main  # Change to your default branch (e.g., main)
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # You can choose a different runner if needed
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up JDK 17
+      - name: Set up JDK
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'adopt'  # Specify the distribution to use
-
-      - name: Install dependencies
-        run: sudo apt-get install -y wget unzip
 
       - name: Install Google Chrome
         run: |
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -y install -f
+          echo "Installing Google Chrome..."
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
       - name: Get Chrome version
-        id: chrome_version
+        id: get_chrome_version
         run: |
-          CHROME_VERSION=$(google-chrome --version | grep -o '[0-9]*\.[0-9]*\.[0-9]*')
-          MAJOR_CHROME_VERSION=$(echo $CHROME_VERSION | cut -d '.' -f 1)  # Extract major version only
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
           echo "CHROME_VERSION=${CHROME_VERSION}" >> $GITHUB_ENV
+          MAJOR_CHROME_VERSION=$(echo ${CHROME_VERSION} | cut -d '.' -f 1-2)
           echo "MAJOR_CHROME_VERSION=${MAJOR_CHROME_VERSION}" >> $GITHUB_ENV
 
-      - name: Get ChromeDriver version
-        id: chromedriver
+      - name: Download ChromeDriver
         run: |
-          echo "Requesting ChromeDriver for Chrome version ${MAJOR_CHROME_VERSION}"  # Debugging output
+          echo "Requesting ChromeDriver for Chrome version ${MAJOR_CHROME_VERSION}"
           CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_CHROME_VERSION}" | tr -d '\n')
-          echo "CHROME_DRIVER_VERSION=${CHROME_DRIVER_VERSION}" >> $GITHUB_ENV  # Store version in environment variable
-
-      - name: Download and install ChromeDriver
-        run: |
-          echo "Downloading ChromeDriver version ${CHROME_DRIVER_VERSION}"  # Debugging output
+          echo "CHROME_DRIVER_VERSION=${CHROME_DRIVER_VERSION}" >> $GITHUB_ENV
+          echo "Downloading ChromeDriver version ${CHROME_DRIVER_VERSION}"
           wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/  # Move to a location in PATH
           sudo chmod +x /usr/local/bin/chromedriver
 
-      - name: Build with Maven
-        run: mvn clean install  # Adjust this if you're using a different build tool
+      - name: Check Versions
+        run: |
+          echo "Chrome Version: $CHROME_VERSION"
+          echo "ChromeDriver Version: $CHROME_DRIVER_VERSION"
 
-      - name: Run tests
-        run: mvn test  # Adjust this if you want to run tests with a different command
+      - name: Run Tests
+        run: |
+          # Replace with your testing command, e.g., for Maven or Gradle
+          mvn test  # or ./gradlew test
