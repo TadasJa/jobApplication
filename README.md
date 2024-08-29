@@ -6,12 +6,12 @@ Chosen web page : https://www.demoblaze.com/
 
 Whole project was created using IntelliJ
 
-### To run test in the GitHub repository:
+### To run test in the GitHub repository (user must have invitation to collaborate on repository):
  - Press Actions
  - Test Runner (left side of the page)
  - Run Workflow (Right side of the page)
 
-### After the run is finished:
+### After the run is finished (test run were performed several times, please check those):
  - Press on the job
  - Go down the page to the Artifact section
  - Download test-results 
