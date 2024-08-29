@@ -6,7 +6,20 @@ Chosen web page : https://www.demoblaze.com/
 
 Whole project was created using IntelliJ
 
-### For new users prerequisites:
+### To run test in the GitHub repository:
+ - Press Actions
+ - Test Runner (left side of the page)
+ - Run Workflow (Right side of the page)
+
+### After the run is finished:
+ - Press on the job
+ - Go down the page to the Artifact section
+ - Download test-results 
+
+(Results are not perfect. I left 2 tests failing on purpose)
+
+
+### To setup locally for new users prerequisites:
 
  - Java 17
  - Maven
