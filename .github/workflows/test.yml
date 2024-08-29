@@ -21,29 +21,30 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y wget unzip
 
-      - name: Install Chrome
+      - name: Install Google Chrome
         run: |
-          echo "Installing Chrome..."
+          echo "Installing Google Chrome..."
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O google-chrome.deb
           sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+
+      - name: Get Chrome and ChromeDriver versions
+        id: get_versions
+        run: |
+          # Set up the Chrome environment variables
+          export CHROME_BIN="/usr/bin/google-chrome"
+          export CHROMEWEBDRIVER="/usr/local/share/chrome_driver"
+
+          # Get Chrome version
+          CHROME_VERSION=$("$CHROME_BIN" --version | grep -oP '\d+\.\d+\.\d+\.\d+')
           echo "Installed Chrome version: ${CHROME_VERSION}"
 
-      - name: Get ChromeDriver version
-        id: get_chromedriver
-        run: |
-          MAJOR_CHROME_VERSION=$(echo ${CHROME_VERSION} | cut -d '.' -f 1-2)
-          echo "Requesting ChromeDriver for Chrome version ${MAJOR_CHROME_VERSION}"
-
-          # Check if MAJOR_CHROME_VERSION is empty
-          if [ -z "$MAJOR_CHROME_VERSION" ]; then
-            echo "MAJOR_CHROME_VERSION is empty. Exiting."
-            exit 1
-          fi
+          # Extract major version for ChromeDriver
+          MAJOR_CHROME_VERSION=$(echo ${CHROME_VERSION} | cut -d '.' -f 1)
+          echo "Requesting ChromeDriver for Chrome major version ${MAJOR_CHROME_VERSION}"
 
           # Try to get the ChromeDriver version corresponding to the major Chrome version
           CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_CHROME_VERSION}" || echo "")
-          
+
           # Fallback to the latest ChromeDriver if the specific version fails
           if [ -z "$CHROME_DRIVER_VERSION" ]; then
             echo "Failed to retrieve ChromeDriver version for major version ${MAJOR_CHROME_VERSION}. Trying latest version..."
@@ -57,11 +58,22 @@ jobs:
           fi
 
           echo "CHROME_DRIVER_VERSION=${CHROME_DRIVER_VERSION}" >> $GITHUB_ENV
-          echo "Downloading ChromeDriver version ${CHROME_DRIVER_VERSION}"
+          echo "Downloading ChromeDriver version ${CHROME_DRIVER_VERSION}..."
+
+          # Create the directory for ChromeDriver if it doesn't exist
+          mkdir -p "$CHROMEWEBDRIVER"
+
+          # Download and install ChromeDriver
           wget "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip"
           unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/chromedriver
+          sudo mv chromedriver "$CHROMEWEBDRIVER/chromedriver"
+          sudo chmod +x "$CHROMEWEBDRIVER/chromedriver"
+
+      - name: Verify Chrome and ChromeDriver versions
+        run: |
+          echo "Verifying versions..."
+          "$CHROME_BIN" --version
+          "$CHROMEWEBDRIVER/chromedriver" --version
 
       - name: Run Tests
         run: mvn test
