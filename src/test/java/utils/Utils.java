@@ -4,7 +4,6 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import steps.Hooks;
 
 import java.time.Duration;
 
@@ -16,7 +15,6 @@ public class Utils {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            // Optionally, re-interrupt the thread if needed
             Thread.currentThread().interrupt();
         }
     }
@@ -27,7 +25,7 @@ public class Utils {
         wait.until(ExpectedConditions.alertIsPresent());
         Alert alert = driver.switchTo().alert();
         String alertText = alert.getText();
-        assertEquals("Theres no message", message , alertText);
+        assertEquals("Theres no message", message, alertText);
         alert.accept();
         System.out.println("Alert message: " + alertText);
     }

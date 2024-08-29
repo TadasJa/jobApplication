@@ -8,6 +8,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import utils.Hooks;
 import utils.Utils;
 
 import java.time.Duration;
@@ -66,7 +67,7 @@ public class StepDefinitionsForSignUp {
     }
 
     @And("I see sign up message {string}")
-    public void signUpMessage(String message)  {
+    public void signUpMessage(String message) {
         String successMessage = "Sign up successful.";
         String alreadyExistMessage = "This user already exist.";
         String withoutUserNameAndPassword = "Please fill out Username and Password.";

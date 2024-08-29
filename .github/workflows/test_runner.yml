@@ -1,9 +1,8 @@
-name: Selenium Tests
-
+name: Test Runner
 on:
   push:
   pull_request:
-  workflow_dispatch:  # Allows manual triggering of the workflow
+  workflow_dispatch:
 
 jobs:
   test:
@@ -52,7 +51,7 @@ jobs:
 
       - name: Run Tests
         run: mvn test
-        continue-on-error: true  # Allows the workflow to continue even if this step fails
+        continue-on-error: true
 
       - name: List test report files
         run: ls target/surefire-reports

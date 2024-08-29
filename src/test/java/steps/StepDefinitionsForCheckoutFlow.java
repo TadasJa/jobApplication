@@ -7,6 +7,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import utils.Hooks;
 import utils.Utils;
 
 import java.time.Duration;
@@ -69,10 +70,10 @@ public class StepDefinitionsForCheckoutFlow {
     }
 
     @And("I see checkout message")
-    public void checkoutMessage()  {
+    public void checkoutMessage() {
         Utils.sleep(1000);
         String missingCredentials = "Please fill out Name and Creditcard.";
         Utils.checkAlert(missingCredentials);
-        }
+    }
 
 }

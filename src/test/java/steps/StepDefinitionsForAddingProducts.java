@@ -1,18 +1,16 @@
 package steps;
 
 import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import utils.Hooks;
 import utils.Utils;
 
 import java.time.Duration;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 
@@ -50,7 +48,7 @@ public class StepDefinitionsForAddingProducts {
 
     @Then("I see the same product that I added {string}")
     public void checkIfTheSameProductIsAdded(String product) {
-        WebElement checkTheValue = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//td[text()='"+ product +"']")));
+        WebElement checkTheValue = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//td[text()='" + product + "']")));
         String value = checkTheValue.getText();
         assertEquals("The values do not match!", product, value);
         System.out.println("The values match: " + value);
@@ -60,19 +58,19 @@ public class StepDefinitionsForAddingProducts {
     @Then("I remove the product that was added previously {string}")
     public void removeTheProductFromCart(String product) {
         Utils.sleep(1000);
-        WebElement deleteButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//td[contains(text(), '"+ product +"')]/following-sibling::td/a[contains(@onclick, 'deleteItem')]")));
+        WebElement deleteButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//td[contains(text(), '" + product + "')]/following-sibling::td/a[contains(@onclick, 'deleteItem')]")));
         deleteButton.click();
         Utils.sleep(2000);
     }
 
     @And("I see success message for adding the product to the cart")
-    public void addedMessage()  {
+    public void addedMessage() {
         String addedToCart = "Product added.";
         Utils.checkAlert(addedToCart);
     }
 
     @And("I press on home page button")
-    public void homePage()  {
+    public void homePage() {
         Utils.sleep(1000);
         WebElement pressOnHomePageButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@class='nav-link' and contains(text(), 'Home')]")));
         pressOnHomePageButton.click();
