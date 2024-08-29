@@ -1,0 +1,50 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - master  # Change to your default branch (e.g., main)
+  pull_request:
+    branches:
+      - master  # Change to your default branch (e.g., main)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # You can choose a different runner if needed
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'  # Specify the distribution to use
+
+      - name: Install dependencies
+        run: sudo apt-get install -y wget unzip
+
+      - name: Install Chrome
+        run: |
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -y install -f
+
+      - name: Get Chrome version
+        id: chrome_version
+        run: |
+          echo "CHROME_VERSION=$(google-chrome --version | grep -o '[0-9]*\.[0-9]*\.[0-9]*')" >> $GITHUB_ENV
+
+      - name: Install ChromeDriver
+        run: |
+          CHROME_DRIVER_VERSION=$(curl -sSL https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION} | tr -d '\n')
+          wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/  # Move to a location in PATH
+          sudo chmod +x /usr/local/bin/chromedriver
+
+      - name: Build with Maven
+        run: mvn clean install  # Use this if you're using Maven as a build tool
+
+      - name: Run tests
+        run: mvn test  # Use this if you want to run tests
