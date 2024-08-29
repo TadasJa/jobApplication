@@ -34,10 +34,11 @@ jobs:
         id: chrome_version
         run: |
           echo "CHROME_VERSION=$(google-chrome --version | grep -o '[0-9]*\.[0-9]*\.[0-9]*')" >> $GITHUB_ENV
+          echo "MAJOR_CHROME_VERSION=$(google-chrome --version | grep -o '[0-9]*' | head -n 1)" >> $GITHUB_ENV  # Major version for ChromeDriver
 
       - name: Install ChromeDriver
         run: |
-          CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}" | tr -d '\n')
+          CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_CHROME_VERSION}" | tr -d '\n')
           echo "CHROME_DRIVER_VERSION=${CHROME_DRIVER_VERSION}" >> $GITHUB_ENV
           wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
