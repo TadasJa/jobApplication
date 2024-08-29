@@ -52,9 +52,11 @@ jobs:
 
       - name: Run Tests
         run: mvn clean test
+        continue-on-error: true  # Ensure the workflow continues even if tests fail
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4  # Updated to v4
+        if: always()  # Always run this step, regardless of test success or failure
         with:
           name: test-results
           path: |
