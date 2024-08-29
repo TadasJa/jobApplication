@@ -34,12 +34,16 @@ jobs:
         id: chrome_version
         run: |
           echo "CHROME_VERSION=$(google-chrome --version | grep -o '[0-9]*\.[0-9]*\.[0-9]*')" >> $GITHUB_ENV
-          echo "MAJOR_CHROME_VERSION=$(google-chrome --version | grep -o '[0-9]*' | head -n 1)" >> $GITHUB_ENV  # Major version for ChromeDriver
+          echo "MAJOR_CHROME_VERSION=$(echo $CHROME_VERSION | cut -d '.' -f 1-2)" >> $GITHUB_ENV  # Get major version
+          echo "CHROME_VERSION=${CHROME_VERSION}"  # Debugging output
+          echo "MAJOR_CHROME_VERSION=${MAJOR_CHROME_VERSION}"  # Debugging output
 
       - name: Install ChromeDriver
         run: |
+          echo "Requesting ChromeDriver for Chrome version ${MAJOR_CHROME_VERSION}"  # Debugging output
           CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_CHROME_VERSION}" | tr -d '\n')
-          echo "CHROME_DRIVER_VERSION=${CHROME_DRIVER_VERSION}" >> $GITHUB_ENV
+          echo "CHROME_DRIVER_VERSION=${CHROME_DRIVER_VERSION}" >> $GITHUB_ENV  # Store version in environment variable
+          echo "Downloading ChromeDriver version ${CHROME_DRIVER_VERSION}"  # Debugging output
           wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/  # Move to a location in PATH
