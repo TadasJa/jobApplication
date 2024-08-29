@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -26,7 +26,6 @@ jobs:
 
       - name: Install Specific Version of Google Chrome
         run: |
-          echo "Installing Google Chrome version 114.0.5735.90..."
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O google-chrome.deb
           sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
 
@@ -37,8 +36,6 @@ jobs:
           export CHROMEWEBDRIVER="${GITHUB_WORKSPACE}/chrome_driver"
           CHROME_VERSION="114.0.5735.90"
           CHROME_DRIVER_VERSION="114.0.5735.90"
-          echo "Using hardcoded Chrome version: ${CHROME_VERSION}"
-          echo "Using hardcoded ChromeDriver version: ${CHROME_DRIVER_VERSION}"
           mkdir -p "$CHROMEWEBDRIVER"
           wget "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip"
           unzip chromedriver_linux64.zip -d "$CHROMEWEBDRIVER"
@@ -46,19 +43,14 @@ jobs:
 
       - name: Verify Chrome and ChromeDriver versions
         run: |
-          echo "Verifying versions..."
           "$CHROME_BIN" --version
           "$CHROMEWEBDRIVER/chromedriver" --version
 
       - name: Run Tests
-        run: mvn clean test
-        continue-on-error: true  # Ensure the workflow continues even if tests fail
+        run: mvn test
 
       - name: Upload Test Results
-        uses: actions/upload-artifact@v4  # Updated to v4
-        if: always()  # Always run this step, regardless of test success or failure
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: |
-            target/surefire-reports/*.xml  # For XML test results
-            target/surefire-reports/*.html  # For HTML test reports
+          path: target/surefire-reports/*.xml
