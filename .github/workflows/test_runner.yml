@@ -54,6 +54,9 @@ jobs:
         run: mvn test
         continue-on-error: true  # Allows the workflow to continue even if this step fails
 
+      - name: Generate Test Report
+        run: mvn surefire-report:report  # Generate the report after tests
+
       - name: List test report files
         run: ls target/surefire-reports
 
@@ -62,3 +65,9 @@ jobs:
         with:
           name: test-results
           path: target/surefire-reports/*.xml
+
+      - name: Upload HTML Test Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-html-report
+          path: target/site/surefire-report.html
