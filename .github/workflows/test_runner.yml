@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'  # Use the JDK version you need
+          distribution: 'temurin'  # Specify the distribution
 
       - name: Cache Maven packages
         uses: actions/cache@v2
