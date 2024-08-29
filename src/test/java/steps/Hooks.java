@@ -8,6 +8,7 @@ import io.cucumber.java.After;
 
 public class Hooks {
     private static WebDriver driver;
+
     public static WebDriver getDriver() {
         return driver;
     }
@@ -16,12 +17,18 @@ public class Hooks {
     public void setUp() {
         // Initialize ChromeOptions
         ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless"); // Run in headless mode
+        options.addArguments("--no-sandbox"); // Disable sandboxing
+        options.addArguments("--disable-dev-shm-usage"); // Overcome limited resource problems
+        options.addArguments("--disable-gpu"); // Disable GPU hardware acceleration
+        options.addArguments("--window-size=1920,1080"); // Set window size
         options.addArguments("--incognito"); // Open Chrome in incognito mode
-        options.addArguments("--disable-search-engine-choice-screen"); // Disable all extensions (optional)
+        options.addArguments("--disable-search-engine-choice-screen"); // Disable search engine choice screen
 
         // Initialize the ChromeDriver
         driver = new ChromeDriver(options);
 
+        // Open the target URL
         driver.get("https://www.demoblaze.com/");
     }
 
