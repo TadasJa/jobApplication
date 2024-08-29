@@ -21,9 +21,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y wget unzip
 
-      - name: Install Google Chrome
+      - name: Install Specific Version of Google Chrome
         run: |
-          echo "Installing Google Chrome..."
+          echo "Installing Google Chrome version 114.0.5735.90..."
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O google-chrome.deb
           sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
 
@@ -34,31 +34,12 @@ jobs:
           export CHROME_BIN="/usr/bin/google-chrome"
           export CHROMEWEBDRIVER="${GITHUB_WORKSPACE}/chrome_driver"
 
-          # Get Chrome version
-          CHROME_VERSION=$("$CHROME_BIN" --version | grep -oP '\d+\.\d+\.\d+\.\d+')
-          echo "Installed Chrome version: ${CHROME_VERSION}"
-
-          # Extract major version for ChromeDriver
-          MAJOR_CHROME_VERSION=$(echo ${CHROME_VERSION} | cut -d '.' -f 1)
-          echo "Requesting ChromeDriver for Chrome major version ${MAJOR_CHROME_VERSION}"
-
-          # Try to get the ChromeDriver version corresponding to the major Chrome version
-          CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_CHROME_VERSION}" || echo "")
-
-          # Fallback to the latest ChromeDriver if the specific version fails
-          if [ -z "$CHROME_DRIVER_VERSION" ]; then
-            echo "Failed to retrieve ChromeDriver version for major version ${MAJOR_CHROME_VERSION}. Trying latest version..."
-            CHROME_DRIVER_VERSION=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE" || echo "")
-          fi
-
-          # Check if ChromeDriver version retrieval was successful
-          if [ -z "$CHROME_DRIVER_VERSION" ]; then
-            echo "Failed to retrieve ChromeDriver version. Exiting."
-            exit 1
-          fi
-
-          echo "CHROME_DRIVER_VERSION=${CHROME_DRIVER_VERSION}" >> $GITHUB_ENV
-          echo "Downloading ChromeDriver version ${CHROME_DRIVER_VERSION}..."
+          # Hardcode Chrome and ChromeDriver versions
+          CHROME_VERSION="114.0.5735.90"
+          CHROME_DRIVER_VERSION="114.0.5735.90"
+          
+          echo "Using hardcoded Chrome version: ${CHROME_VERSION}"
+          echo "Using hardcoded ChromeDriver version: ${CHROME_DRIVER_VERSION}"
 
           # Create the directory for ChromeDriver if it doesn't exist
           mkdir -p "$CHROMEWEBDRIVER"
