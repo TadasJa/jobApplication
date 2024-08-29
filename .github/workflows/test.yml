@@ -32,7 +32,7 @@ jobs:
         run: |
           # Set up the Chrome environment variables
           export CHROME_BIN="/usr/bin/google-chrome"
-          export CHROMEWEBDRIVER="/usr/local/share/chrome_driver"
+          export CHROMEWEBDRIVER="${GITHUB_WORKSPACE}/chrome_driver"
 
           # Get Chrome version
           CHROME_VERSION=$("$CHROME_BIN" --version | grep -oP '\d+\.\d+\.\d+\.\d+')
@@ -65,9 +65,8 @@ jobs:
 
           # Download and install ChromeDriver
           wget "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip"
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver "$CHROMEWEBDRIVER/chromedriver"
-          sudo chmod +x "$CHROMEWEBDRIVER/chromedriver"
+          unzip chromedriver_linux64.zip -d "$CHROMEWEBDRIVER"
+          chmod +x "$CHROMEWEBDRIVER/chromedriver"
 
       - name: Verify Chrome and ChromeDriver versions
         run: |
