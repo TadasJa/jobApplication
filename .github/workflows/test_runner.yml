@@ -61,4 +61,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-results
-          path: target/surefire-reports/*.xml
+          path: |
+            target/surefire-reports/*.xml
+            target/surefire-reports/*.txt
