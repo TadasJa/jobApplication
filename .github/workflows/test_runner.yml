@@ -1,15 +1,12 @@
-name: CI
+name: Selenium Tests
 
 on:
   push:
-    branches:
-      - main  # Change to your default branch name
   pull_request:
-    branches:
-      - main  # Change to your default branch name
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,19 +16,39 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
-          java-version: '17'  # Use the JDK version you need
-          distribution: 'temurin'  # Specify the distribution
+          java-version: '17'
+          distribution: 'temurin'
 
-      - name: Cache Maven packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip
 
-      - name: Install dependencies
-        run: mvn install -DskipTests
+      - name: Install Specific Version of Google Chrome
+        run: |
+          echo "Installing Google Chrome version 114.0.5735.90..."
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O google-chrome.deb
+          sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
 
-      - name: Run tests
+      - name: Set up Chrome environment
+        id: chrome_setup
+        run: |
+          export CHROME_BIN="/usr/bin/google-chrome"
+          export CHROMEWEBDRIVER="${GITHUB_WORKSPACE}/chrome_driver"
+          CHROME_VERSION="114.0.5735.90"
+          CHROME_DRIVER_VERSION="114.0.5735.90"
+          echo "Using hardcoded Chrome version: ${CHROME_VERSION}"
+          echo "Using hardcoded ChromeDriver version: ${CHROME_DRIVER_VERSION}"
+          mkdir -p "$CHROMEWEBDRIVER"
+          wget "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver_linux64.zip -d "$CHROMEWEBDRIVER"
+          chmod +x "$CHROMEWEBDRIVER/chromedriver"
+
+      - name: Verify Chrome and ChromeDriver versions
+        run: |
+          echo "Verifying versions..."
+          "$CHROME_BIN" --version
+          "$CHROMEWEBDRIVER/chromedriver" --version
+
+      - name: Run Tests
         run: mvn test
